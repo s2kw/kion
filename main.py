@@ -77,7 +77,7 @@ try:
             text = text.replace(old, new)
         return text
     
-    text = replace_multiple(text, {"\n\n":"\n"})
+    # text = replace_multiple(text, {"\n\n":"\n"})
 
     # 天気予報情報を文字列変数に格納
     weather_info = f"発表元: {publishing_office}\n"
