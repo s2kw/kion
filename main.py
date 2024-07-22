@@ -77,14 +77,14 @@ try:
             text = text.replace(old, new)
         return text
     
-    # text = replace_multiple(text, {"\n\n":"\n"})
+    text = replace_multiple(text, {"\n\n":"\n"})
 
     # 天気予報情報を文字列変数に格納
-    weather_info = f"発表元: {publishing_office}\n"
-    weather_info += f"報告日時: {report_datetime}\n"
-    weather_info += f"対象地域: {target_area}\n"
-    weather_info += f"見出し: {headline_text}\n"
-    weather_info += f"詳細:\n{text}"
+    weather_info = f"発表元: {publishing_office}\n\n"
+    weather_info += f"報告日時: {report_datetime}\n\n"
+    weather_info += f"対象地域: {target_area}\n\n"
+    weather_info += f"見出し: {headline_text}\n\n"
+    weather_info += f"詳細:\n{clean_text(text)}"
 
     print(weather_info)
 
@@ -93,7 +93,7 @@ except requests.RequestException as e:
 
 
 # slack
-slack_data = {'text': f"おはようございます🌞\n{comment}\n\n{temperature_info}\n\n{ clean_text(weather_info)}" }
+slack_data = {'text': f"おはようございます🌞\n{comment}\n\n{temperature_info}\n\n{weather_info}" }
 
 slack_webhook_url = os.getenv('SLACK_WEBHOOK_URL')
 
