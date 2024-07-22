@@ -1,6 +1,8 @@
 import pandas as pd
 import requests
 import os
+import json
+import re
 from io import StringIO
 
 # 気象庁の最新気温データのURL
@@ -45,8 +47,53 @@ elif temperature > judgement_temperature:
 else:
     comment = "本日は残念ながら出社です。熱中症に気をつけて出社しましょう。😇😇😇"
 
+
+# 特殊文字除去関数
+def clean_text(text):
+    # 正規表現を使用して、可視文字以外のすべての文字を除去
+    cleaned_text = re.sub(r'[^\u0020-\u007E\u00A0-\u00FF\u0100-\u017F\u0180-\u024F\u0370-\u03FF\u0400-\u04FF\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]', '', text)
+    return cleaned_text
+
+# 天気予報も取得する
+url = "https://www.jma.go.jp/bosai/forecast/data/overview_forecast/130000.json"
+weather_info = ""
+try:
+    # URLからデータを取得
+    response = requests.get(url)
+    response.raise_for_status()  # エラーがあれば例外を発生させる
+    
+    # JSONデータをPythonオブジェクトに変換
+    weather_data = json.loads(response.text)
+
+    # 必要な情報を抽出
+    publishing_office = weather_data['publishingOffice']
+    report_datetime = weather_data['reportDatetime']
+    target_area = weather_data['targetArea']
+    headline_text = weather_data['headlineText']
+    text = weather_data['text']
+    
+    def replace_multiple(text, replacements):
+        for old, new in replacements.items():
+            text = text.replace(old, new)
+        return text
+    
+    text = replace_multiple(text, {"\n\n":"\n"})
+
+    # 天気予報情報を文字列変数に格納
+    weather_info = f"発表元: {publishing_office}\n"
+    weather_info += f"報告日時: {report_datetime}\n"
+    weather_info += f"対象地域: {target_area}\n"
+    weather_info += f"見出し: {headline_text}\n"
+    weather_info += f"詳細:\n{text}"
+
+    print(weather_info)
+
+except requests.RequestException as e:
+    print(f"エラーが発生しました: {e}")
+
+
 # slack
-slack_data = {'text': f"おはようございます🌞\n{comment}\n\n{temperature_info}" }
+slack_data = {'text': f"おはようございます🌞\n{comment}\n\n{temperature_info}\n\n{ clean_text(weather_info)}" }
 
 slack_webhook_url = os.getenv('SLACK_WEBHOOK_URL')
 
@@ -54,6 +101,7 @@ response = requests.post(
     slack_webhook_url, json=slack_data,
     headers={'Content-Type': 'application/json'}
 )
+
 
 if response.status_code != 200:
     raise ValueError(
