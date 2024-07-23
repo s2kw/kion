@@ -51,7 +51,10 @@ else:
 # 特殊文字除去関数
 def clean_text(text):
     # 正規表現を使用して、可視文字以外のすべての文字を除去
-    cleaned_text = re.sub(r'[^\u0020-\u007E\u00A0-\u00FF\u0100-\u017F\u0180-\u024F\u0370-\u03FF\u0400-\u04FF\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]', '', text)
+    # cleaned_text = re.sub(r'[^\u0020-\u007E\u00A0-\u00FF\u0100-\u017F\u0180-\u024F\u0370-\u03FF\u0400-\u04FF\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]', '', text)
+    
+    # 通常の改行は残す 
+    cleaned_text = re.sub(r'[^\u0020-\u007E\u00A0-\u00FF\u0100-\u017F\u0180-\u024F\u0370-\u03FF\u0400-\u04FF\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\n\r]', '', text)
     return cleaned_text
 
 # 天気予報も取得する
